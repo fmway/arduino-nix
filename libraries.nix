@@ -2,27 +2,29 @@
 
 with builtins;
 let
-  inherit (pkgs.callPackage ./lib.nix {}) convertHash;
+  inherit (pkgs.callPackage ./lib.nix {}) convertHash latestVersion;
     
-  libraries = mapAttrs (name: versions: listToAttrs (map ({version, url, checksum, ...}: {
-    name = version;
-    value = stdenv.mkDerivation {
-      pname = name;
-      inherit version;
+  libraries = mapAttrs (name: versions: let
+    res = listToAttrs (map ({version, url, checksum, ...}: {
+      name = version;
+      value = stdenv.mkDerivation {
+        pname = name;
+        inherit version;
 
-      installPhase = ''
-        runHook preInstall
+        installPhase = ''
+          runHook preInstall
 
-        mkdir -p "$out/libraries/$pname"
-        cp -R * "$out/libraries/$pname/"
+          mkdir -p "$out/libraries/$pname"
+          cp -R * "$out/libraries/$pname/"
 
-        runHook postInstall
-      '';
-      nativeBuildInputs = [ pkgs.unzip ];
-      src = fetchurl ({
-        url = url;
-      } // (convertHash checksum));
-    };
-  }) versions)) (groupBy ({ name, ... }: name) libraryIndex.libraries);
+          runHook postInstall
+        '';
+        nativeBuildInputs = [ pkgs.unzip ];
+        src = fetchurl ({
+          url = url;
+        } // (convertHash checksum));
+      };
+    }) versions);
+  in res // { latest = latestVersion res; }) (groupBy ({ name, ... }: name) libraryIndex.libraries);
 in
   libraries
