@@ -1,6 +1,26 @@
 {
   "nodes": {
-    "root": {}
+    "arduino-index": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1742083295,
+        "narHash": "sha256-FNMG5wNIcqCexZd7FC/XUvAvYb+uPVPAkxFKfdSpapA=",
+        "owner": "bouk",
+        "repo": "arduino-indexes",
+        "rev": "194e98461503ab174aec5aee009b9107d2af34d1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "bouk",
+        "repo": "arduino-indexes",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "arduino-index": "arduino-index"
+      }
+    }
   },
   "root": "root",
   "version": 7

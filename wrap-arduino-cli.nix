@@ -1,4 +1,8 @@
-{ lib, pkgs }:
+{ lib
+, pkgs
+, packageIndex ? { packages = []; }
+, libraryIndex ? { libraries = []; }
+, ... }:
 let
   wrap = {
     packages ? []
@@ -19,8 +23,8 @@ let
       paths = builtinPackages ++ packages ++ [
         # Add some dummy files to keep the CLI happy
         (pkgs.writeTextDir "inventory.yaml" (builtins.toJSON {}))
-        (pkgs.writeTextDir "package_index.json" (builtins.toJSON {packages = [];}))
-        (pkgs.writeTextDir "library_index.json" (builtins.toJSON {libraries = [];}))
+        (pkgs.writeTextDir "package_index.json" (builtins.toJSON packageIndex))
+        (pkgs.writeTextDir "library_index.json" (builtins.toJSON libraryIndex))
       ];
       postBuild = ''
         mkdir -p $out/staging
