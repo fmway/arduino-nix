@@ -36,7 +36,7 @@ let
   }) packageIndex.packages);
     
   # Platform are installed in $platform_name/hardware/$architecture/$version
-  platforms = listToAttrs (map ({ name, platforms, ... }: {
+  platforms = listToAttrs (map ({ name, platforms, scope ? name, ... }: {
     inherit name;
     value = mapAttrs (architecture: versions: let
       res = listToAttrs (map ({version, url, checksum, toolsDependencies ? [], ...}: {
@@ -48,6 +48,9 @@ let
 
           toolsDependencies = map ({packager, name, version}: arduinoPackages.tools.${packager}.${name}.${version}) toolsDependencies;
           passAsFile = [ "toolsDependencies" ];
+          passthru = {
+            inherit scope architecture;
+          };
           installPhase = ''
             runHook preInstall
 
