@@ -29,12 +29,36 @@ in {
     realPath = lib.mkEnableOption "use realpath instead of symlink (packages and libraries)";
     packages = lib.mkOption {
       description = "list of packages / platforms";
-      type = with lib.types; listOf package;
+      type = let
+        t = with lib.types; listOf (package // {
+          check = pkg:
+            package.check pkg &&
+            (pkg.passthru or {}) ? architecture &&
+            (pkg.passthru or {}) ? scope
+          ;
+        });
+      in t // {
+        merge = loc: defs:
+          lib.attrValues (
+            lib.foldl' (acc: curr:
+              acc // { "${curr.scope}:${curr.architecture}" = curr; }
+            ) {} (t.merge loc defs)
+          );
+      };
       default = [];
     };
     libraries = lib.mkOption {
       description = "list of libraries";
-      type = with lib.types; listOf package;
+      type = let
+        t = with lib.types; listOf package;
+      in t // {
+        merge = loc: defs:
+          lib.attrValues (
+            lib.foldl' (acc: curr:
+              acc // { "${curr.pname}" = curr; }
+            ) {} (t.merge loc defs)
+          );
+      };
       default = [];
     };
     userPath = lib.mkOption {
