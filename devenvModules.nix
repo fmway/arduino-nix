@@ -101,14 +101,16 @@ in {
     arduino-cli = { inherit (result.passthru) dataPath userPath; };
     tasks."arduino-cli:copy" = lib.mkIf cfg.realPath {
       before = [ "devenv:enterShell" ];
-      exec = /* sh */ ''
+      exec = let
+        hash = toString (inputs.self.narHash or inputs.self.lastModifiedDate);
+      in /* sh */ ''
         arduino_dir="${config.devenv.root}/.arduino-cli"
         [ -d "$arduino_dir" ] || mkdir -p "$arduino_dir"
         [ -e "$arduino_dir/.gitignore" ] || printf '*\n.*\n' > "$arduino_dir/.gitignore"
         hash=""
         [ ! -e "$arduino_dir/hash" ] || hash="$(cat "$arduino_dir/hash")"
-        if [ -z "$hash" ] || [ "$hash" != "${inputs.self.narHash}" ]; then
-          echo "${inputs.self.narHash}" > "$arduino_dir/hash"
+        if [ -z "$hash" ] || [ "$hash" != "${hash}" ]; then
+          echo "${hash}" > "$arduino_dir/hash"
           [ ! -d "$arduino_dir/data" ] || rm -rf "$arduino_dir/data"
           [ ! -d "$arduino_dir/user" ] || rm -rf "$arduino_dir/user"
           mkdir -p "$arduino_dir/data"
